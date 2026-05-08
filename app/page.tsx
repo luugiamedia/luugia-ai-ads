@@ -13,7 +13,7 @@ export default function Home() {
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const [history, setHistory] = useState([]);
+  const [history, setHistory] = useState<any[]>([]);
 
   const [videoUrl, setVideoUrl] = useState("");
   const [imageUrl, setImageUrl] = useState("");
