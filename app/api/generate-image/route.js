@@ -10,16 +10,22 @@ export async function POST(req) {
 
     const body = await req.json();
 
-    const { prompt } = body;
-
     const output = await replicate.run(
       "black-forest-labs/flux-schnell",
       {
         input: {
-          prompt: prompt,
+          prompt: `
+cinematic storyboard frame,
+luxury advertising,
+ultra realistic,
+movie lighting,
+${body.prompt}
+          `,
         },
       }
     );
+
+    console.log(output);
 
     return Response.json({
       image: output[0],
@@ -27,8 +33,12 @@ export async function POST(req) {
 
   } catch (error) {
 
+    console.log(error);
+
     return Response.json({
       error: error.message,
     });
+
   }
+
 }

@@ -17,27 +17,39 @@ export default function Home() {
 
   const [videoUrl, setVideoUrl] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [finalVideo, setFinalVideo] = useState("");
 
+  // =========================
   // GENERATE AI ADS
-  const generateImage = async () => {
+  // =========================
+const exportTVC = async () => {
 
-  const res = await fetch("/api/generate-image", {
-    method: "POST",
+  try {
 
-    headers: {
-      "Content-Type": "application/json",
-    },
+    const res = await fetch("/api/export-video", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        script: result,
+        video: videoUrl,
+        image: imageUrl,
+      }),
+    });
 
-    body: JSON.stringify({
-      prompt: result,
-    }),
-  });
+    const data = await res.json();
 
-  const data = await res.json();
+    if (data.video) {
+      setFinalVideo(data.video);
+    }
 
-  if (data.image) {
-    setImageUrl(data.image);
+  } catch (error) {
+
+    console.log(error);
+
   }
+
 };
   const generateAI = async () => {
 
@@ -47,6 +59,7 @@ export default function Home() {
 
       const res = await fetch("/api/generate", {
         method: "POST",
+
         headers: {
           "Content-Type": "application/json",
         },
@@ -82,6 +95,8 @@ export default function Home() {
 
     } catch (error) {
 
+      console.log(error);
+
       setResult("Error generating AI ads");
 
     } finally {
@@ -91,12 +106,16 @@ export default function Home() {
     }
   };
 
+  // =========================
   // GENERATE VIDEO
+  // =========================
+
   const generateVideo = async () => {
 
     try {
 
       const res = await fetch("/api/generate-video", {
+
         method: "POST",
 
         headers: {
@@ -110,10 +129,64 @@ export default function Home() {
 
       const data = await res.json();
 
+      console.log("VIDEO DATA:", data);
+
       if (data.video) {
 
-        setVideoUrl(data.video);
+        if (Array.isArray(data.video)) {
 
+          setVideoUrl(data.video[0]);
+
+        } else {
+
+          setVideoUrl(data.video);
+
+        }
+      }
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+  };
+
+  // =========================
+  // GENERATE IMAGE
+  // =========================
+
+  const generateImage = async () => {
+
+    try {
+
+      const res = await fetch("/api/generate-image", {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+          prompt: result,
+        }),
+      });
+
+      const data = await res.json();
+
+      console.log("IMAGE DATA:", data);
+
+      if (data.image) {
+
+        if (Array.isArray(data.image)) {
+
+          setImageUrl(data.image[0]);
+
+        } else {
+
+          setImageUrl(data.image);
+
+        }
       }
 
     } catch (error) {
@@ -126,6 +199,8 @@ export default function Home() {
   return (
 
     <main className="min-h-screen bg-black text-white overflow-hidden relative">
+
+      {/* BACKGROUND */}
 
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(120,119,198,0.18),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.08),transparent_25%)]" />
 
@@ -194,8 +269,11 @@ export default function Home() {
           </h2>
 
           <p className="mt-8 text-lg text-zinc-400 max-w-xl leading-relaxed">
-            Generate cinematic hooks, storyboard scenes, TikTok ad scripts,
-            AI video prompts and premium ad concepts instantly.
+
+            Generate cinematic hooks, storyboard scenes,
+            TikTok ad scripts, AI video prompts and
+            premium ad concepts instantly.
+
           </p>
 
         </div>
@@ -256,10 +334,12 @@ export default function Home() {
                 value={platform}
                 onChange={(e) => setPlatform(e.target.value)}
               >
+
                 <option>TikTok Ads</option>
                 <option>Facebook Ads</option>
                 <option>YouTube Shorts</option>
                 <option>Instagram Reels</option>
+
               </select>
 
               <button
@@ -276,11 +356,18 @@ export default function Home() {
                 Generate AI Video
               </button>
 <button
-  onClick={generateImage}
-  className="w-full p-5 rounded-2xl bg-pink-600 text-white font-black text-lg"
+  onClick={exportTVC}
+  className="w-full p-5 rounded-2xl bg-green-600 text-white font-black text-lg"
 >
-  Generate Storyboard Image
+  Export Final TVC
 </button>
+              <button
+                onClick={generateImage}
+                className="w-full p-5 rounded-2xl bg-pink-600 text-white font-black text-lg"
+              >
+                Generate Storyboard Image
+              </button>
+
             </div>
 
             {/* OUTPUT */}
@@ -356,13 +443,27 @@ export default function Home() {
                 )
               }
 {
-  imageUrl && (
-    <img
-      src={imageUrl}
+  finalVideo && (
+    <video
+      controls
+      autoPlay
       className="mt-8 rounded-3xl w-full"
+      src={finalVideo}
     />
   )
 }
+              {/* IMAGE */}
+
+              {
+                imageUrl && (
+                  <img
+                    src={imageUrl}
+                    alt="AI Storyboard"
+                    className="mt-8 rounded-3xl w-full"
+                  />
+                )
+              }
+
             </div>
 
           </div>
@@ -412,6 +513,5 @@ export default function Home() {
       </section>
 
     </main>
-
   );
 }
